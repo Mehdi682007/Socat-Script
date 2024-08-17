@@ -1,8 +1,19 @@
 #!/bin/bash
 
+# تنظیم مسیر فایل ذخیره‌سازی پورت‌ها و آدرس‌های IPv6
+PORTS_FILE="/etc/rc.local"
+
 # تابع برای بررسی وضعیت اجرا
 check_status() {
-    if sudo netstat -tuln | grep -q ":${PORT} .*LISTEN"; then
+    local running=false
+    for port in "${ports[@]}"; do
+        if sudo netstat -tuln | grep -q ":${port} .*LISTEN"; then
+            running=true
+            break
+        fi
+    done
+
+    if $running; then
         echo -e "\033[0;32mRunning\033[0m"
     else
         echo -e "\033[0;31mNot Running\033[0m"
@@ -108,9 +119,10 @@ show_menu() {
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
 
-    echo "***** ParsDigitall Script Management *****"
+    echo "***** ParsDigitall Script Management1 *****"
     echo "=========================================="
     echo -n "Status: "
+    load_ports  # بارگذاری پورت‌ها
     check_status  # اضافه کردن وضعیت سرویس
     echo "=========================================="
     echo "1) Install Script"
@@ -118,6 +130,15 @@ show_menu() {
     echo "3) Exit"
     echo "=========================================="
     echo -n "Please select an option [1-3]: "
+}
+
+# تابع برای بارگذاری پورت‌ها
+load_ports() {
+    if [[ -f "$PORTS_FILE" ]]; then
+        ports=($(grep -oP 'LISTEN:\K\d+' "$PORTS_FILE"))
+    else
+        ports=()
+    fi
 }
 
 # منو اصلی
