@@ -15,7 +15,7 @@
 bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/install.sh)
 
 ```
-## To install, select option 1 and follow the steps.
+## To install, select option 1 and follow the steps
 The first thing you'll be asked is to enter the number of ports you want to tunnel. For example, if you want to tunnel two ports, enter the number 2.
 
 Next, you'll be prompted to enter the port number, for example, port 443. After pressing Enter, you'll be asked to provide the IPv6 address of the external server. Enter the external IPv6 address. If you selected two ports, you'll be asked again to enter another port and its corresponding external IPv6 address. You can even use two different external servers with one Iranian server.
