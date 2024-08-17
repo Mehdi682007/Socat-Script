@@ -84,8 +84,9 @@ show_menu() {
     echo "    |_|   |______||______||______|\_____||_|  \_\/_/    \_\|_|  |_| (_)  \ \__,_||_|  |_|   |_|   \____/  \____/    |_|    \____/ |____/ "
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
-
+    echo -e "\033[0;32m"
     echo "***** ParsDigitall Script Management *****"
+    echo -e "\033[0m"
     echo "=========================================="
     echo "1) Install Script"
     echo "2) Uninstall Script"
