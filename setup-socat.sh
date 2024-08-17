@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # تنظیم مسیر فایل ذخیره‌سازی پورت‌ها و آدرس‌های IPv6
-PORTS_FILE="/etc/your_custom_folder/your_ports_file.conf"
-SCRIPT_FILE="/usr/local/bin/socat_tunnel.sh"
+PORTS_FILE="/etc/pd_tun/pd_tun_ports.conf"
+SCRIPT_FILE="/usr/local/bin/pd_socat_tunnel.sh"
 
 # تابع برای بررسی وضعیت اجرا
 check_status() {
@@ -56,9 +56,9 @@ install_script() {
     done
 
     sudo chmod +x "$SCRIPT_FILE"
-
+    echo -e "\033[0;32m"
     echo "Script installed successfully."
-
+    echo -e "\033[0m"
     # تنظیم سرویس systemd برای اجرای اسکریپت
     echo "[Unit]
 Description=Socat Tunnel Service
@@ -135,8 +135,9 @@ show_menu() {
     echo "    |_|   |______||______||______|\_____||_|  \_\/_/    \_\|_|  |_| (_)  \ \__,_||_|  |_|   |_|   \____/  \____/    |_|    \____/ |____/ "
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
-
+    echo -e "\033[0;32m"
     echo "***** ParsDigitall Script Management *****"
+    echo -e "\033[0m"
     echo "=========================================="
     echo -n "Status: "
     load_ports  # بارگذاری پورت‌ها
