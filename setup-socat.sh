@@ -3,8 +3,19 @@
 # تنظیم مسیر فایل ذخیره‌سازی پورت‌ها و آدرس‌های IPv6
 PORTS_FILE="/etc/rc.local"
 
+# تابع برای بررسی وجود netstat
+check_netstat() {
+    if ! command -v netstat &> /dev/null; then
+        echo "netstat not found. Installing net-tools..."
+        sudo apt update
+        sudo apt install -y net-tools
+    fi
+}
+
 # تابع برای بررسی وضعیت اجرا
 check_status() {
+    check_netstat  # بررسی و نصب netstat در صورت نیاز
+
     local running=false
     for port in "${ports[@]}"; do
         if sudo netstat -tuln | grep -q ":${port} .*LISTEN"; then
@@ -40,6 +51,9 @@ install_script() {
     # نصب socat در صورت عدم نصب
     sudo apt update
     sudo apt install -y socat
+
+    # بررسی و نصب netstat اگر لازم باشد
+    check_netstat
 
     # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا
     echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
