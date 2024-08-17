@@ -2,8 +2,12 @@
 </br>
 </br>
 </br>
+- حمایت از من
+- Tron(TRX) `TRwa4tZretyDndiUwCEZYokKoe1ezSQxsE`
+</br>
 ## تانل سوکت ipv6 با استفاده از اسکریپت 
 ### با کپی کردن دستور خیلی راحت میتونید از این اسکریپت استفاده کنید
+# دستور نصب
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/setup-socat.sh)
 ```
