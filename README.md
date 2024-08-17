@@ -1,5 +1,7 @@
 [English](https://github.com/Mehdi682007/Socat-Script/blob/main/README.md)  | [Persian](https://github.com/Mehdi682007/Socat-Script/blob/main/README.fa.md)
 </br>
+</br>
+</br>
 Socat-Script
 IPv6 Socat Tunnel using Script
 You can easily use this script by copying the following command:
