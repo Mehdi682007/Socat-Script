@@ -10,7 +10,7 @@
 # Socat-Script
 ## IPv6 Socat Tunnel Script
 ### You can easily use this script by copying the following command:
-#Install
+# Install
 ```bash
 bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/setup-socat.sh)
 
