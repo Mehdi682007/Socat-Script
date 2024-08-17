@@ -2,10 +2,20 @@
 
 # تابع برای نصب اسکریپت
 install_script() {
-    echo "Enter the port number you want to use: "
-    read port
-    echo "Enter the IPv6 address you want to forward to: "
-    read ipv6
+    echo "Enter the number of ports you want to use: "
+    read num_ports
+
+    ports=()
+    ipv6_addresses=()
+
+    for ((i=1; i<=num_ports; i++)); do
+        echo "Enter port number $i: "
+        read port
+        ports+=("$port")
+        echo "Enter the IPv6 address for port $port: "
+        read ipv6
+        ipv6_addresses+=("$ipv6")
+    done
 
     # نصب socat در صورت عدم نصب
     sudo apt update
@@ -13,7 +23,14 @@ install_script() {
 
     # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا
     echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
-    echo "socat TCP4-LISTEN:${port},fork TCP6:[${ipv6}]:${port},ipv6only=1 &" | sudo tee -a /etc/rc.local > /dev/null
+
+    # افزودن دستورات socat برای هر پورت و IPv6
+    for index in "${!ports[@]}"; do
+        port=${ports[$index]}
+        ipv6=${ipv6_addresses[$index]}
+        echo "socat TCP4-LISTEN:${port},fork TCP6:[${ipv6}]:${port},ipv6only=1 &" | sudo tee -a /etc/rc.local > /dev/null
+    done
+
     echo "exit 0" | sudo tee -a /etc/rc.local > /dev/null
 
     # تنظیم مجوز اجرایی برای /etc/rc.local
@@ -25,13 +42,18 @@ install_script() {
 
 # تابع برای حذف اسکریپت
 uninstall_script() {
-    # حذف خط socat از /etc/rc.local
-    sudo sed -i '/socat TCP4-LISTEN/d' /etc/rc.local
+    read -p "Are you sure you want to uninstall the script? (yes/no): " confirm
+    if [[ "$confirm" == "yes" ]]; then
+        # حذف خطوط socat از /etc/rc.local
+        sudo sed -i '/socat TCP4-LISTEN/d' /etc/rc.local
 
-    # حذف خط #!/bin/bash از ابتدای فایل اگر موجود باشد
-    sudo sed -i '1d' /etc/rc.local
+        # حذف خط #!/bin/bash از ابتدای فایل اگر موجود باشد
+        sudo sed -i '1d' /etc/rc.local
 
-    echo "Script uninstalled successfully."
+        echo "Script uninstalled successfully."
+    else
+        echo "Uninstallation canceled."
+    fi
     exit 0
 }
 
