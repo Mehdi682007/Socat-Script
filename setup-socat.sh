@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # تنظیم مسیر فایل ذخیره‌سازی پورت‌ها و آدرس‌های IPv6
-PORTS_FILE="/etc/pd_tun/pd_tun_ports.conf"
-SCRIPT_FILE="/usr/local/bin/pd_socat_tunnel.sh"
+PORTS_FILE="/etc/rc.local"
 
 # تابع برای بررسی وضعیت اجرا
 check_status() {
@@ -42,38 +41,22 @@ install_script() {
     sudo apt update
     sudo apt install -y socat
 
-    # ایجاد دایرکتوری سفارشی در صورت عدم وجود
-    sudo mkdir -p "$(dirname "$PORTS_FILE")"
+    # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا
+    echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
 
-    # ایجاد فایل جدید و نوشتن اطلاعات پورت‌ها و آدرس‌های IPv6
-    echo "#!/bin/bash" | sudo tee "$SCRIPT_FILE" > /dev/null
-
+    # افزودن دستورات socat برای هر پورت و IPv6
     for index in "${!ports[@]}"; do
         port=${ports[$index]}
         ipv6=${ipv6_addresses[$index]}
-        echo "socat TCP4-LISTEN:${port},fork TCP6:[${ipv6}]:${port},ipv6only=1 &" | sudo tee -a "$SCRIPT_FILE" > /dev/null
-        echo "PORT:${port} IP:${ipv6}" | sudo tee -a "$PORTS_FILE" > /dev/null
+        echo "socat TCP4-LISTEN:${port},fork TCP6:[${ipv6}]:${port},ipv6only=1 &" | sudo tee -a /etc/rc.local > /dev/null
     done
 
-    sudo chmod +x "$SCRIPT_FILE"
-    echo -e "\033[0;32m"
+    echo "exit 0" | sudo tee -a /etc/rc.local > /dev/null
+
+    # تنظیم مجوز اجرایی برای /etc/rc.local
+    sudo chmod +x /etc/rc.local
+
     echo "Script installed successfully."
-    echo -e "\033[0m"
-    # تنظیم سرویس systemd برای اجرای اسکریپت
-    echo "[Unit]
-Description=Socat Tunnel Service
-After=network.target
-
-[Service]
-ExecStart=$SCRIPT_FILE
-ExecStop=/bin/kill \$MAINPID
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/socat_tunnel.service > /dev/null
-
-    sudo systemctl enable socat_tunnel.service
-    sudo systemctl start socat_tunnel.service
 
     # ریبوت سیستم (پرسش از کاربر)
     echo -n "Do you want to reboot the system now? (y/n): "
@@ -93,13 +76,13 @@ uninstall_script() {
     read -p "Are you sure you want to uninstall the script? (yes/no): " confirm
     if [[ "$confirm" == "yes" ]]; then
         # توقف تمام فرآیندهای socat
-        sudo systemctl stop socat_tunnel.service
-        sudo systemctl disable socat_tunnel.service
-        sudo rm /etc/systemd/system/socat_tunnel.service
+        sudo pkill -x socat
 
-        # حذف فایل‌های پورت و اسکریپت
-        sudo rm "$PORTS_FILE"
-        sudo rm "$SCRIPT_FILE"
+        # حذف خطوط socat از /etc/rc.local
+        sudo sed -i '/socat TCP4-LISTEN/d' /etc/rc.local
+
+        # حذف خط #!/bin/bash از ابتدای فایل اگر موجود باشد
+        sudo sed -i '1d' /etc/rc.local
 
         echo "Script uninstalled successfully."
     else
@@ -135,9 +118,8 @@ show_menu() {
     echo "    |_|   |______||______||______|\_____||_|  \_\/_/    \_\|_|  |_| (_)  \ \__,_||_|  |_|   |_|   \____/  \____/    |_|    \____/ |____/ "
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
-    echo -e "\033[0;32m"
+
     echo "***** ParsDigitall Script Management *****"
-    echo -e "\033[0m"
     echo "=========================================="
     echo -n "Status: "
     load_ports  # بارگذاری پورت‌ها
@@ -153,7 +135,7 @@ show_menu() {
 # تابع برای بارگذاری پورت‌ها
 load_ports() {
     if [[ -f "$PORTS_FILE" ]]; then
-        ports=($(grep -oP 'PORT:\K\d+' "$PORTS_FILE"))
+        ports=($(grep -oP 'LISTEN:\K\d+' "$PORTS_FILE"))
     else
         ports=()
     fi
