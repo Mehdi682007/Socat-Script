@@ -24,4 +24,5 @@ The installation process will then proceed, and you will be asked if you want to
 
 I will soon add more options and tunneling methods to the script. A video tutorial on how to install this tunnel will be provided below so you can follow along.
 
-## To uninstall, simply select option 2 and confirm by typing yes to completely remove the script from the server.
+# uninstall
+simply select option 2 and confirm by typing yes to completely remove the script from the server.
