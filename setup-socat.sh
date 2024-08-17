@@ -85,7 +85,7 @@ show_menu() {
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
 
-    echo "      ParsDigitall Script Management      "
+    echo "***** ParsDigitall Script Management *****"
     echo "=========================================="
     echo "1) Install Script"
     echo "2) Uninstall Script"
