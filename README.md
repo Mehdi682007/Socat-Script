@@ -3,4 +3,4 @@
 استفاده از اسکریپت با وارد کردن این ادرس
 
 
-bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/setup-socat.sh)
+"bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/setup-socat.sh)"
