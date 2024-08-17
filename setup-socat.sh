@@ -2,8 +2,7 @@
 
 # تابع برای بررسی وضعیت اجرا
 check_status() {
-    if pgrep -x "socat" > /dev/null
-    then
+    if sudo netstat -tuln | grep -q ":${PORT} .*LISTEN"; then
         echo -e "\033[0;32mRunning\033[0m"
     else
         echo -e "\033[0;31mNot Running\033[0m"
@@ -47,6 +46,17 @@ install_script() {
     sudo chmod +x /etc/rc.local
 
     echo "Script installed successfully."
+
+    # ریبوت سیستم (پرسش از کاربر)
+    echo -n "Do you want to reboot the system now? (y/n): "
+    read -r reboot_choice
+    if [ "$reboot_choice" = "y" ]; then
+        echo "Rebooting system..."
+        sudo reboot
+    else
+        echo "You chose not to reboot the system. Please reboot manually later."
+    fi
+
     exit 0
 }
 
