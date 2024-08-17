@@ -20,6 +20,7 @@ install_script() {
     sudo chmod +x /etc/rc.local
 
     echo "Script installed successfully."
+    exit 0
 }
 
 # تابع برای حذف اسکریپت
@@ -31,6 +32,7 @@ uninstall_script() {
     sudo sed -i '1d' /etc/rc.local
 
     echo "Script uninstalled successfully."
+    exit 0
 }
 
 # تابع برای نمایش منو و پردازش ورودی
@@ -53,22 +55,21 @@ show_menu() {
 }
 
 # منو اصلی
-while true; do
-    show_menu
-    read choice
-    case $choice in
-        1)
-            install_script
-            ;;
-        2)
-            uninstall_script
-            ;;
-        3)
-            echo "Exiting..."
-            exit 0
-            ;;
-        *)
-            echo "Invalid option. Please select a valid option."
-            ;;
-    esac
-done
+show_menu
+read choice
+case $choice in
+    1)
+        install_script
+        ;;
+    2)
+        uninstall_script
+        ;;
+    3)
+        echo "Exiting..."
+        exit 0
+        ;;
+    *)
+        echo "Invalid option. Please select a valid option."
+        exit 1
+        ;;
+esac
