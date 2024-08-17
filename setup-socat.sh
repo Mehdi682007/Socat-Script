@@ -78,7 +78,9 @@ install_script() {
     # تنظیم مجوز اجرایی برای /etc/rc.local
     sudo chmod +x /etc/rc.local
 
+    echo -e "\033[0;32m"
     echo "Script installed successfully."
+    echo -e "\033[0m"
 
     # ریبوت سیستم (پرسش از کاربر)
     echo -n "Do you want to reboot the system now? (y/n): "
