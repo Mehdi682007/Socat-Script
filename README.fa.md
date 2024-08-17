@@ -1,4 +1,7 @@
-# Socat-Script
+[English](https://github.com/Mehdi682007/Socat-Script/blob/main/README.md)  | [Persian](https://github.com/Mehdi682007/Socat-Script/blob/main/README.fa.md)
+</br>
+</br>
+</br>
 ## تانل سوکت ipv6 با استفاده از اسکریپت 
 ### با کپی کردن دستور خیلی راحت میتونید از این اسکریپت استفاده کنید
 ```bash
