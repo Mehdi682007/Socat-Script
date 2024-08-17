@@ -119,7 +119,7 @@ show_menu() {
     echo "                                                                          \____/                                                        "
     echo -e "\033[0m"  # بازگشت به رنگ پیش‌فرض
 
-    echo "***** ParsDigitall Script Management11****"
+    echo "***** ParsDigitall Script Management گزینه مورد نظر رو انتخاب کنید *****"
     echo "=========================================="
     echo -n "Status: "
     load_ports  # بارگذاری پورت‌ها
