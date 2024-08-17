@@ -12,7 +12,7 @@
 ### با کپی کردن دستور خیلی راحت میتونید از این اسکریپت استفاده کنید
 # دستور نصب
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/setup-socat.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/Mehdi682007/Socat-Script/main/install.sh)
 ```
 
 #### برای نصب گزینه 1 رو بزنید و مراحل رو برید 
