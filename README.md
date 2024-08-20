@@ -26,3 +26,6 @@ I will soon add more options and tunneling methods to the script. A video tutori
 
 # uninstall
 simply select option 2 and confirm by typing yes to completely remove the script from the server.
+
+## Video of this tunnel
+https://youtu.be/50tuxd4ZZtU
