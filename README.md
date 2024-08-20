@@ -28,4 +28,5 @@ I will soon add more options and tunneling methods to the script. A video tutori
 simply select option 2 and confirm by typing yes to completely remove the script from the server.
 
 ## Video of this tunnel
-https://youtu.be/50tuxd4ZZtU
+[![Example Video](https://img.youtube.com/vi/50tuxd4ZZtU/0.jpg)](https://youtu.be/50tuxd4ZZtU)
+
