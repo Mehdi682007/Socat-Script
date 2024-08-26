@@ -87,9 +87,54 @@ install_script() {
     exit 0
 }
 
+# تابع برای افزودن IPv6 لوکال
+add_ipv6_local() {
+    sudo apt-get install -y iproute2
+    
+    echo "Enter local IPv4 address: "
+    read local_ipv4
+    
+    echo "Enter remote IPv4 address: "
+    read remote_ipv4
+    
+    echo "Enter your desired local IPv6 address: "
+    read local_ipv6
+    
+    echo "Enter your desired remote IPv6 address: "
+    read remote_ipv6
+    
+    # ساخت فایل پیکربندی netplan
+    sudo tee /etc/netplan/pdtun.yaml > /dev/null <<EOL
+network:
+  version: 2
+  tunnels:
+    tunel01:
+      mode: sit
+      local: ${local_ipv4}
+      remote: ${remote_ipv4}
+      addresses:
+        - ${local_ipv6}/64
+      mtu: 1500
+EOL
+
+    sudo netplan apply
+
+    # ساخت فایل پیکربندی systemd network
+    sudo tee /etc/systemd/network/tun0.network > /dev/null <<EOL
+[Network]
+Address=${local_ipv6}/64
+Gateway=${remote_ipv6}
+EOL
+
+    sudo systemctl restart systemd-networkd
+
+    echo "Local IPv6 address added successfully."
+    exit 0
+}
+
 # تابع برای حذف اسکریپت
 uninstall_script() {
-    read -p "Are you sure you want to uninstall the script? (yes/no): " confirm
+    read -p "Are you sure you want to uninstall the script and remove local IPv6 settings? (yes/no): " confirm
     if [[ "$confirm" == "yes" ]]; then
         # توقف تمام فرآیندهای socat
         sudo pkill -x socat
@@ -100,7 +145,18 @@ uninstall_script() {
         # حذف خط #!/bin/bash از ابتدای فایل اگر موجود باشد
         sudo sed -i '1d' /etc/rc.local
 
-        echo "Script uninstalled successfully."
+        # حذف فایل‌های پیکربندی IPv6 لوکال
+        if [[ -f "/etc/netplan/pdtun.yaml" ]]; then
+            sudo rm /etc/netplan/pdtun.yaml
+            sudo netplan apply
+        fi
+
+        if [[ -f "/etc/systemd/network/tun0.network" ]]; then
+            sudo rm /etc/systemd/network/tun0.network
+            sudo systemctl restart systemd-networkd
+        fi
+
+        echo "Script and local IPv6 settings uninstalled successfully."
     else
         echo "Uninstallation canceled."
     fi
@@ -144,10 +200,11 @@ show_menu() {
     check_status  # اضافه کردن وضعیت سرویس
     echo "=========================================="
     echo "1) Install Script"
-    echo "2) Uninstall Script"
-    echo "3) Exit"
+    echo "2) Add Local IPv6"
+    echo "3) Uninstall Script"
+    echo "4) Exit"
     echo "=========================================="
-    echo -n "Please select an option [1-3]: "
+    echo -n "Please select an option [1-4]: "
 }
 
 # تابع برای بارگذاری پورت‌ها
@@ -167,9 +224,12 @@ case $choice in
         install_script
         ;;
     2)
-        uninstall_script
+        add_ipv6_local
         ;;
     3)
+        uninstall_script
+        ;;
+    4)
         echo "Exiting..."
         exit 0
         ;;
