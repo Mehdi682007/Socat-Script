@@ -91,11 +91,16 @@ install_script() {
 add_ipv6_local() {
     sudo apt-get install -y iproute2
 
-        # بررسی و نصب Netplan اگر لازم باشد
-    if ! command -v netplan &> /dev/null; then
-        echo "Netplan not found. Installing netplan.io..."
-        sudo apt update
-        sudo apt install -y netplan.io
+# اطمینان از آن‌ماسک، راه‌اندازی و فعال‌سازی systemd-networkd
+    echo "Ensuring systemd-networkd is unmasked, started, and enabled..."
+    sudo systemctl unmask systemd-networkd 2>/dev/null
+    sudo systemctl start systemd-networkd 2>/dev/null
+    sudo systemctl enable systemd-networkd 2>/dev/null
+
+    # بررسی اینکه آیا سرویس systemd-networkd به‌درستی شروع شده است یا خیر
+    if ! sudo systemctl is-active --quiet systemd-networkd; then
+        echo "Failed to start systemd-networkd. Please check your system's configuration."
+        exit 1
     fi
 
         # اطمینان از فعال بودن systemd-networkd
