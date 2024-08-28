@@ -97,6 +97,11 @@ add_ipv6_local() {
         sudo apt update
         sudo apt install -y netplan.io
     fi
+
+        # اطمینان از فعال بودن systemd-networkd
+    sudo systemctl unmask systemd-networkd
+    sudo systemctl start systemd-networkd
+    sudo systemctl enable systemd-networkd
     
     echo "Enter local IPv4 address: "
     read local_ipv4
