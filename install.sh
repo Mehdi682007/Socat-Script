@@ -90,6 +90,13 @@ install_script() {
 # تابع برای افزودن IPv6 لوکال
 add_ipv6_local() {
     sudo apt-get install -y iproute2
+
+        # بررسی و نصب Netplan اگر لازم باشد
+    if ! command -v netplan &> /dev/null; then
+        echo "Netplan not found. Installing netplan.io..."
+        sudo apt update
+        sudo apt install -y netplan.io
+    fi
     
     echo "Enter local IPv4 address: "
     read local_ipv4
