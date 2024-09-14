@@ -74,6 +74,9 @@ install_script() {
     echo "Script installed successfully."
     echo -e "\033[0m"
 
+    # افزودن کرون جاب برای ریستارت خودکار تانل‌ها
+    add_cron_job
+
     # ریبوت سیستم (پرسش از کاربر)
     echo -n "Do you want to reboot the system now? (y/n): "
     read -r reboot_choice
@@ -91,14 +94,14 @@ install_script() {
 add_ipv6_local() {
     sudo apt-get install -y iproute2
 
-# بررسی و نصب Netplan اگر لازم باشد
+    # بررسی و نصب Netplan اگر لازم باشد
     if ! command -v netplan &> /dev/null; then
         echo "Netplan not found. Installing netplan.io..."
         sudo apt update
         sudo apt install -y netplan.io
     fi
-    
-# اطمینان از آن‌ماسک، راه‌اندازی و فعال‌سازی systemd-networkd
+
+    # اطمینان از آن‌ماسک، راه‌اندازی و فعال‌سازی systemd-networkd
     echo "Ensuring systemd-networkd is unmasked, started, and enabled..."
     sudo systemctl unmask systemd-networkd 2>/dev/null
     sudo systemctl start systemd-networkd 2>/dev/null
@@ -109,19 +112,19 @@ add_ipv6_local() {
         echo "Failed to start systemd-networkd. Please check your system's configuration."
         exit 1
     fi
-    
+
     echo "Enter local IPv4 address: "
     read local_ipv4
-    
+
     echo "Enter remote IPv4 address: "
     read remote_ipv4
-    
+
     echo "Enter your desired local IPv6 address: "
     read local_ipv6
-    
+
     echo "Enter your desired remote IPv6 address: "
     read remote_ipv6
-    
+
     # ساخت فایل پیکربندی netplan
     sudo tee /etc/netplan/pdtun.yaml > /dev/null <<EOL
 network:
@@ -182,6 +185,36 @@ uninstall_script() {
     exit 0
 }
 
+# تابع برای افزودن کرون جاب برای ریستارت تانل‌ها
+add_cron_job() {
+    echo "Adding cron job to restart tunnels every hour..."
+
+    # چک کردن اینکه کرون جاب قبلاً وجود دارد یا نه
+    (sudo crontab -l 2>/dev/null | grep -q "restart-tunnels") || {
+        # اضافه کردن کرون جاب برای ریستارت تانل‌ها
+        (sudo crontab -l 2>/dev/null; echo "0 * * * * /path/to/your/script.sh --restart-tunnels >> /var/log/tunnel_restart.log 2>&1") | sudo crontab -
+    }
+
+    echo "Cron job added successfully."
+}
+
+# تابع برای ریستارت تانل‌ها
+restart_tunnels() {
+    echo "Restarting tunnels..."
+    sudo systemctl restart systemd-networkd
+    sudo systemctl restart socat
+    echo "Tunnels restarted successfully."
+}
+
+# تابع برای بارگذاری پورت‌ها
+load_ports() {
+    if [[ -f "$PORTS_FILE" ]]; then
+        ports=($(grep -oP 'LISTEN:\K\d+' "$PORTS_FILE"))
+    else
+        ports=()
+    fi
+}
+
 # تابع برای نمایش منو و پردازش ورودی
 show_menu() {
     clear
@@ -226,15 +259,6 @@ show_menu() {
     echo -n "Please select an option [1-4]: "
 }
 
-# تابع برای بارگذاری پورت‌ها
-load_ports() {
-    if [[ -f "$PORTS_FILE" ]]; then
-        ports=($(grep -oP 'LISTEN:\K\d+' "$PORTS_FILE"))
-    else
-        ports=()
-    fi
-}
-
 # منو اصلی
 show_menu
 read choice
@@ -257,3 +281,9 @@ case $choice in
         exit 1
         ;;
 esac
+
+# پردازش ورودی برای ریستارت تانل‌ها در صورت نیاز
+if [ "$1" == "--restart-tunnels" ]; then
+    restart_tunnels
+    exit 0
+fi
