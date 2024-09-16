@@ -55,8 +55,10 @@ install_script() {
     # بررسی و نصب netstat اگر لازم باشد
     check_netstat
 
-    # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا
-    echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
+    # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا اگر وجود نداشته باشد
+    if ! sudo head -n 1 /etc/rc.local | grep -q "#!/bin/bash"; then
+        echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
+    fi
 
     # افزودن دستورات socat برای هر پورت و IPv6
     for index in "${!ports[@]}"; do
@@ -154,7 +156,45 @@ EOL
     exit 0
 }
 
-# تابع برای حذف اسکریپت
+# تابع برای افزودن IPv4 تونل
+add_ipv4_tunnel() {
+    echo "Enter the port number for the IPv4 tunnel: "
+    read port
+
+    echo "Enter the destination server IP address for the IPv4 tunnel: "
+    read destination_server
+
+    # نصب socat در صورت عدم نصب
+    sudo apt update
+    sudo apt install -y socat
+
+    # بررسی و نصب netstat اگر لازم باشد
+    check_netstat
+
+    # بازنویسی /etc/rc.local با افزودن #!/bin/bash به بالا اگر وجود نداشته باشد
+    if ! sudo head -n 1 /etc/rc.local | grep -q "#!/bin/bash"; then
+        echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
+    fi
+
+    # افزودن دستور socat برای تونل IPv4
+    echo "socat TCP4-LISTEN:${port},fork TCP4:${destination_server}:${port} &" | sudo tee -a /etc/rc.local > /dev/null
+
+    # افزودن exit 0 اگر در فایل موجود نباشد
+    if ! sudo tail -n 1 /etc/rc.local | grep -q "exit 0"; then
+        echo "exit 0" | sudo tee -a /etc/rc.local > /dev/null
+    fi
+
+    # تنظیم مجوز اجرایی برای /etc/rc.local
+    sudo chmod +x /etc/rc.local
+
+    echo -e "\033[0;32m"
+    echo "IPv4 tunnel added successfully."
+    echo -e "\033[0m"
+
+    # افزودن کرون جاب برای ریستارت خودکار تانل‌ها
+    add_cron_job
+}
+
 uninstall_script() {
     read -p "Are you sure you want to uninstall the script and remove local IPv6 settings? (yes/no): " confirm
     if [[ "$confirm" == "yes" ]]; then
@@ -166,6 +206,11 @@ uninstall_script() {
 
         # حذف خط #!/bin/bash از ابتدای فایل اگر موجود باشد
         sudo sed -i '1d' /etc/rc.local
+
+        # حذف خط exit 0 اگر دیگر خطوطی باقی نمانده باشند
+        if ! sudo grep -q 'socat TCP4-LISTEN' /etc/rc.local; then
+            sudo sed -i '$d' /etc/rc.local
+        fi
 
         # حذف فایل‌های پیکربندی IPv6 لوکال
         if [[ -f "/etc/netplan/pdtun.yaml" ]]; then
@@ -253,10 +298,11 @@ show_menu() {
     echo "=========================================="
     echo "1) Install Script"
     echo "2) Add Local IPv6"
-    echo "3) Uninstall Script"
-    echo "4) Exit"
+    echo "3) Add IPv4 Tunnel"
+    echo "4) Uninstall Script"
+    echo "5) Exit"
     echo "=========================================="
-    echo -n "Please select an option [1-4]: "
+    echo -n "Please select an option [1-5]: "
 }
 
 # منو اصلی
@@ -270,9 +316,12 @@ case $choice in
         add_ipv6_local
         ;;
     3)
-        uninstall_script
+        add_ipv4_tunnel
         ;;
     4)
+        uninstall_script
+        ;;
+    5)
         echo "Exiting..."
         exit 0
         ;;
