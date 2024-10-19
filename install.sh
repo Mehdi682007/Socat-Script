@@ -158,11 +158,20 @@ EOL
 
 # تابع برای افزودن IPv4 تونل
 add_ipv4_tunnel() {
-    echo "Enter the port number for the IPv4 tunnel: "
-    read port
+    echo "Enter the number of ports you want to use: "
+    read num_ports
 
-    echo "Enter the destination server IP address for the IPv4 tunnel: "
-    read destination_server
+    ports=()
+    destination_servers=()
+
+    for ((i=1; i<=num_ports; i++)); do
+        echo "Enter port number $i: "
+        read port
+        ports+=("$port")
+        echo "Enter the destination server IP for port $port: "
+        read destination_server
+        destination_servers+=("$destination_server")
+    done
 
     # نصب socat در صورت عدم نصب
     sudo apt update
@@ -176,8 +185,12 @@ add_ipv4_tunnel() {
         echo "#!/bin/bash" | sudo tee /etc/rc.local > /dev/null
     fi
 
-    # افزودن دستور socat برای تونل IPv4
-    echo "socat TCP4-LISTEN:${port},fork TCP4:${destination_server}:${port} &" | sudo tee -a /etc/rc.local > /dev/null
+    # افزودن دستور socat برای هر پورت و سرور مقصد
+    for index in "${!ports[@]}"; do
+        port=${ports[$index]}
+        destination_server=${destination_servers[$index]}
+        echo "socat TCP4-LISTEN:${port},fork TCP4:${destination_server}:${port} &" | sudo tee -a /etc/rc.local > /dev/null
+    done
 
     # افزودن exit 0 اگر در فایل موجود نباشد
     if ! sudo tail -n 1 /etc/rc.local | grep -q "exit 0"; then
@@ -193,6 +206,16 @@ add_ipv4_tunnel() {
 
     # افزودن کرون جاب برای ریستارت خودکار تانل‌ها
     add_cron_job
+
+    # ریبوت سیستم (پرسش از کاربر)
+    echo -n "Do you want to reboot the system now? (y/n): "
+    read -r reboot_choice
+    if [ "$reboot_choice" = "y" ]; then
+        echo "Rebooting system..."
+        sudo reboot
+    else
+        echo "You chose not to reboot the system. Please reboot manually later."
+    fi
 }
 
 uninstall_script() {
