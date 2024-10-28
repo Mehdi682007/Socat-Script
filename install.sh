@@ -260,7 +260,7 @@ add_cron_job() {
     # چک کردن اینکه کرون جاب قبلاً وجود دارد یا نه
     (sudo crontab -l 2>/dev/null | grep -q "restart-tunnels") || {
         # اضافه کردن کرون جاب برای ریستارت تانل‌ها
-        (sudo crontab -l 2>/dev/null; echo "0 * * * * /path/to/your/script.sh --restart-tunnels >> /var/log/tunnel_restart.log 2>&1") | sudo crontab -
+        (sudo crontab -l 2>/dev/null; echo "0 * * * * /etc/rc.local --restart-tunnels >> /var/log/tunnel_restart.log 2>&1") | sudo crontab -
     }
 
     echo "Cron job added successfully."
